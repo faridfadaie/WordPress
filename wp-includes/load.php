@@ -347,9 +347,8 @@ function require_wp_db() {
 
 	if ( isset( $wpdb ) )
 		return;
-	$mongourl = "MONGOURL";
-	$m = new MongoClient($mongourl);
-        $url = parse_url($mongourl);
+	$m = new MongoClient(MDB_HOST);
+        $url = parse_url(MDB_HOST);
         $db_name = preg_replace('/\/(.*)/', '$1', $url['path']);
         $wpmdb = $m->selectDB($db_name);
 	$wpdb = new wpdb( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
