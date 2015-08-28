@@ -597,7 +597,7 @@ class WP_User {
 		switch ( $field ) {
 			case 'id':
 				$user_id = $value;
-				$db_field = '_id';
+				$db_field = 'intId';
 				break;
 			case 'slug':
 				$user_id = wp_cache_get($value, 'userslugs');
@@ -624,7 +624,7 @@ class WP_User {
 		if (!$user = $wpmdb->users->findOne(array($db_field => $value)))
 			return false;
 		$user = array(
-		 	"ID" => hexdec(substr($user["_id"]->{'$id'},0,8)),
+		 	"ID" => $user["intId"],
 			"user_login" => $user["email"],
 			"user_pass" => $user["password"],
 			"user_email" => $user["email"],
