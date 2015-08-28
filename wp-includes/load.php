@@ -339,6 +339,7 @@ function wp_set_lang_dir() {
  */
 function require_wp_db() {
 	global $wpdb;
+	global $wpmdb;
 
 	require_once( ABSPATH . WPINC . '/wp-db.php' );
 	if ( file_exists( WP_CONTENT_DIR . '/db.php' ) )
@@ -346,7 +347,11 @@ function require_wp_db() {
 
 	if ( isset( $wpdb ) )
 		return;
-
+	$mongourl = "MONGOURL";
+	$m = new MongoClient($mongourl);
+        $url = parse_url($mongourl);
+        $db_name = preg_replace('/\/(.*)/', '$1', $url['path']);
+        $wpmdb = $m->selectDB($db_name);
 	$wpdb = new wpdb( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
 }
 
