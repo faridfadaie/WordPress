@@ -577,6 +577,7 @@ class WP_User {
 	 */
 	public static function get_data_by( $field, $value ) {
 		global $wpdb;
+		global $wpmdb;
 
 		if ( 'id' == $field ) {
 			// Make sure the value is numeric to avoid casting objects, for example,
@@ -596,20 +597,20 @@ class WP_User {
 		switch ( $field ) {
 			case 'id':
 				$user_id = $value;
-				$db_field = 'ID';
+				$db_field = '_id';
 				break;
 			case 'slug':
 				$user_id = wp_cache_get($value, 'userslugs');
-				$db_field = 'user_nicename';
+				$db_field = 'email';
 				break;
 			case 'email':
 				$user_id = wp_cache_get($value, 'useremail');
-				$db_field = 'user_email';
+				$db_field = 'email';
 				break;
 			case 'login':
 				$value = sanitize_user( $value );
 				$user_id = wp_cache_get($value, 'userlogins');
-				$db_field = 'user_login';
+				$db_field = 'email';
 				break;
 			default:
 				return false;
@@ -620,10 +621,17 @@ class WP_User {
 				return $user;
 		}
 
-		if ( !$user = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM $wpdb->users WHERE $db_field = %s", $value
-		) ) )
+		if (!$user = $wpmdb->users->findOne(array($db_field => $value)))
 			return false;
+		$user = array(
+		 	"ID" => hexdec(substr($user["_id"]->{'$id'},0,8)),
+			"user_login" => $user["email"],
+			"user_pass" => $user["password"],
+			"user_email" => $user["email"],
+			"display_name" => $user["profile"]["name"],
+			"user_nicename" => $user["profile"]["name"]
+		);
+		$user = json_decode(json_encode($user), FALSE);
 
 		update_user_caches( $user );
 
