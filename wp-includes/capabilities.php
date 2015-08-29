@@ -621,17 +621,15 @@ class WP_User {
 				return $user;
 		}
 
-		if (!$user = $wpmdb->users->findOne(array($db_field => $value)))
+		if (!$user_from_mongo = $wpmdb->users->findOne(array($db_field => $value)))
 			return false;
-		$user = array(
-		 	"ID" => $user["intId"],
-			"user_login" => $user["email"],
-			"user_pass" => $user["password"],
-			"user_email" => $user["email"],
-			"display_name" => $user["profile"]["name"],
-			"user_nicename" => $user["profile"]["name"]
-		);
-		$user = json_decode(json_encode($user), FALSE);
+		$user = new stdClass;
+		$user->ID = $user_from_mongo["intId"];
+		$user->user_login = $user_from_mongo["email"];
+		$user->user_pass = $user_from_mongo["password"];
+		$user->user_email = $user_from_mongo["email"];
+		$user->display_name = $user_from_mongo["profile"]["name"];
+		$user->user_nicename = $user_from_mongo["profile"]["name"];
 
 		update_user_caches( $user );
 
