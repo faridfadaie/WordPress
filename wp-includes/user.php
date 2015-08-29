@@ -1171,16 +1171,17 @@ function get_users( $args = array() ) {
  */
 function get_blogs_of_user( $user_id, $all = false ) {
 	global $wpdb;
+	global $wpmdb;
 
 	$user_id = (int) $user_id;
 
 	// Logged out users can't have blogs
 	if ( empty( $user_id ) )
 		return array();
-
 	$keys = get_user_meta( $user_id );
-	if ( empty( $keys ) )
+	if ( empty( $keys ) ){
 		return array();
+	}
 
 	if ( ! is_multisite() ) {
 		$blog_id = get_current_blog_id();
@@ -1198,8 +1199,8 @@ function get_blogs_of_user( $user_id, $all = false ) {
 	}
 
 	$blogs = array();
-
-	if ( isset( $keys[ $wpdb->base_prefix . 'capabilities' ] ) && defined( 'MULTISITE' ) ) {
+/**
+	if ( isset( $keys[ $wpdb->base_prefix . 'capabilities' ] ) && defined( 'MULTISITE' ) ) {#this means that the user is the admin for the main site.
 		$blog = get_blog_details( 1 );
 		if ( $blog && isset( $blog->domain ) && ( $all || ( ! $blog->archived && ! $blog->spam && ! $blog->deleted ) ) ) {
 			$blogs[ 1 ] = (object) array(
@@ -1217,7 +1218,31 @@ function get_blogs_of_user( $user_id, $all = false ) {
 		}
 		unset( $keys[ $wpdb->base_prefix . 'capabilities' ] );
 	}
-
+**/	
+	foreach (get_user_by( 'id', $user_id )->data->role as $role){
+		if ($role == "admin"){#this is an admin of the whole site
+			$blogs[1] = (object) array(
+				'userblog_id' => 1,
+				'blogname'    => "Doxi blog",
+				'domain'      => 'www.doxi.io',
+				'path'        => "/blog/",
+				'site_id'     => 1,
+				'siteurl'     => get_option( 'siteurl' )
+			);
+		}else{
+			$blog = $wpmdb->businesses->findOne(array('_id' => new MongoId(explode(":",$role)[1])), array("intId","domains","name"));
+			$tmp = "/blog/".$blog["domains"][0]."/";
+			$blogs[$blog["intId"]] = (object) array(
+				'userblog_id' => $blog["intId"],
+                                'blogname'    => $blog["name"]." blog",
+                                'domain'      => 'www.doxi.io',
+                                'path'        => $tmp,
+                                'site_id'     => 1,
+                                'siteurl'     => "http://www.doxi.io/blog"
+			);
+		}
+	}
+/**
 	$keys = array_keys( $keys );
 
 	foreach ( $keys as $key ) {
@@ -1225,6 +1250,7 @@ function get_blogs_of_user( $user_id, $all = false ) {
 			continue;
 		if ( $wpdb->base_prefix && 0 !== strpos( $key, $wpdb->base_prefix ) )
 			continue;
+		#wp_X_capabilities shows that the user is the admin for blog_id=X
 		$blog_id = str_replace( array( $wpdb->base_prefix, '_capabilities' ), '', $key );
 		if ( ! is_numeric( $blog_id ) )
 			continue;
@@ -1246,7 +1272,7 @@ function get_blogs_of_user( $user_id, $all = false ) {
 			);
 		}
 	}
-
+**/
 	/**
 	 * Filter the list of blogs a user belongs to.
 	 *

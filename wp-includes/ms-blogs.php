@@ -240,15 +240,16 @@ function get_blog_details( $fields = null, $get_all = true ) {
 			$details->public = 1;
 		}
 		else{
-			$details = $wpmdb->businesses->findOne(array("intId" => $blog_id));
+			$tmp_details = $wpmdb->businesses->findOne(array("intId" => $blog_id));
 				if ($details){
-					$tmp = "/blog/".$details["domains"][0]."/";
+					$tmp = "/blog/".$tmp_details["domains"][0]."/";
 					$details = new stdClass;
 					$details->blog_id = $blog_id;
 					$details->site_id = 1;
 					$details->domain = "www.doxi.io";
 					$details->path = $tmp;
 					$details->public = 1;
+					$details->blogname = $tmp_details["name"]." blog";
 				}
 		}
 
@@ -266,7 +267,7 @@ function get_blog_details( $fields = null, $get_all = true ) {
 	}
 
 	switch_to_blog( $blog_id );
-	$details->blogname		= get_option( 'blogname' );
+	#$details->blogname		= get_option( 'blogname' );
 	$details->siteurl		= get_option( 'siteurl' );
 	$details->post_count	= get_option( 'post_count' );
 	restore_current_blog();
