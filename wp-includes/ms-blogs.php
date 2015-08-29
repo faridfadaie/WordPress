@@ -242,11 +242,12 @@ function get_blog_details( $fields = null, $get_all = true ) {
 		else{
 			$details = $wpmdb->businesses->findOne(array("intId" => $blog_id));
 				if ($details){
+					$tmp = "/blog/".$details["domains"][0]."/";
 					$details = new stdClass;
 					$details->blog_id = $blog_id;
 					$details->site_id = 1;
 					$details->domain = "www.doxi.io";
-					$details->path = "/blog/" . $details["domains"][0] . "/";
+					$details->path = $tmp;
 					$details->public = 1;
 				}
 		}
