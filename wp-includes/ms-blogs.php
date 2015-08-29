@@ -75,6 +75,7 @@ function get_blogaddress_by_name( $blogname ) {
  */
 function get_id_from_blogname( $slug ) {
 	global $wpdb;
+	global $wpmdb;
 
 	$current_site = get_current_site();
 	$slug = trim( $slug, '/' );
@@ -90,8 +91,13 @@ function get_id_from_blogname( $slug ) {
 		$domain = $current_site->domain;
 		$path = $current_site->path . $slug . '/';
 	}
-
-	$blog_id = $wpdb->get_var( $wpdb->prepare("SELECT blog_id FROM {$wpdb->blogs} WHERE domain = %s AND path = %s", $domain, $path) );
+	if ($path == "/blog/"){
+		$blog_id = 1;
+	}
+	else{
+		$blog_id = $wpmdb->businesses->findOne(array("domains" => explode('/', $path)[2]), array('intId'))["intId"];
+	}
+	#$blog_id = $wpdb->get_var( $wpdb->prepare("SELECT blog_id FROM {$wpdb->blogs} WHERE domain = %s AND path = %s", $domain, $path) );
 	wp_cache_set( 'get_id_from_blogname_' . $slug, $blog_id, 'blog-details' );
 	return $blog_id;
 }
@@ -111,28 +117,49 @@ function get_id_from_blogname( $slug ) {
  */
 function get_blog_details( $fields = null, $get_all = true ) {
 	global $wpdb;
+	global $wpmdb;
 
 	if ( is_array($fields ) ) {
-		if ( isset($fields['blog_id']) ) {
+		if ( isset($fields['blog_id']) ) { #with this we are either here
 			$blog_id = $fields['blog_id'];
-		} elseif ( isset($fields['domain']) && isset($fields['path']) ) {
+		} elseif ( isset($fields['domain']) && isset($fields['path']) ) { #or here
 			$key = md5( $fields['domain'] . $fields['path'] );
 			$blog = wp_cache_get($key, 'blog-lookup');
 			if ( false !== $blog )
 				return $blog;
+			if ($fields['path'] !== "/blog")
+				$blog_from_mongo = $wpmdb->businesses->findOne(array("domains" => explode('/', $fields['path'])[2]));
+				if ($blog_from_mongo){
+					$blog = new stdClass;
+					$blog->blog_id = $blog_from_mongo["intId"];
+					$blog->site_id = 1;
+					$blog->domain = $fields['domain'];
+					$blog->path = $fields['path'];
+					$blog->public = 1;
+				}
+			else{
+				$blog = new stdClass;
+				$blog->blog_id = 1;
+				$blog->site_id = 1;
+				$blog->domain = $fields['domain'];
+				$blog->path = $fields['path'];
+				$blog->public = 1;
+			}
+/**
 			if ( substr( $fields['domain'], 0, 4 ) == 'www.' ) {
 				$nowww = substr( $fields['domain'], 4 );
 				$blog = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->blogs WHERE domain IN (%s,%s) AND path = %s ORDER BY CHAR_LENGTH(domain) DESC", $nowww, $fields['domain'], $fields['path'] ) );
 			} else {
 				$blog = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->blogs WHERE domain = %s AND path = %s", $fields['domain'], $fields['path'] ) );
 			}
+**/
 			if ( $blog ) {
 				wp_cache_set($blog->blog_id . 'short', $blog, 'blog-details');
 				$blog_id = $blog->blog_id;
 			} else {
 				return false;
 			}
-		} elseif ( isset($fields['domain']) && is_subdomain_install() ) {
+		} elseif ( isset($fields['domain']) && is_subdomain_install() ) { #this never happens since we are not using subdomains
 			$key = md5( $fields['domain'] );
 			$blog = wp_cache_get($key, 'blog-lookup');
 			if ( false !== $blog )
@@ -153,12 +180,15 @@ function get_blog_details( $fields = null, $get_all = true ) {
 			return false;
 		}
 	} else {
-		if ( ! $fields )
+		if ( ! $fields ){
 			$blog_id = get_current_blog_id();
-		elseif ( ! is_numeric( $fields ) )
+		}
+		elseif ( ! is_numeric( $fields ) ){
 			$blog_id = get_id_from_blogname( $fields );
-		else
+			}
+		else{
 			$blog_id = $fields;
+}
 	}
 
 	$blog_id = (int) $blog_id;
@@ -200,9 +230,28 @@ function get_blog_details( $fields = null, $get_all = true ) {
 			}
 		}
 	}
-
 	if ( empty($details) ) {
-		$details = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->blogs WHERE blog_id = %d /* get_blog_details */", $blog_id ) );
+		if ($blog_id == 1){
+			$details = new stdClass;
+			$details->blog_id = 1;
+			$details->site_id = 1;
+			$details->domain = "www.doxi.io";
+			$details->path = "/blog/";
+			$details->public = 1;
+		}
+		else{
+			$details = $wpmdb->businesses->findOne(array("intId" => $blog_id));
+				if ($details){
+					$details = new stdClass;
+					$details->blog_id = $blog_id;
+					$details->site_id = 1;
+					$details->domain = "www.doxi.io";
+					$details->path = "/blog/" . $details["domains"][0] . "/";
+					$details->public = 1;
+				}
+		}
+
+		#$details = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->blogs WHERE blog_id = %d /* get_blog_details */", $blog_id ) );
 		if ( ! $details ) {
 			// Set the full cache.
 			wp_cache_set( $blog_id, -1, 'blog-details' );
@@ -234,7 +283,6 @@ function get_blog_details( $fields = null, $get_all = true ) {
 
 	$key = md5( $details->domain . $details->path );
 	wp_cache_set( $key, $details, 'blog-lookup' );
-
 	return $details;
 }
 
