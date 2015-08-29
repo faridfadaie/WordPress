@@ -364,6 +364,7 @@ function get_blog_permalink( $blog_id, $post_id ) {
  */
 function get_blog_id_from_url( $domain, $path = '/' ) {
 	global $wpdb;
+	global $wpmdb;
 
 	$domain = strtolower( $domain );
 	$path = strtolower( $path );
@@ -374,8 +375,12 @@ function get_blog_id_from_url( $domain, $path = '/' ) {
 	elseif ( $id )
 		return (int) $id;
 
-	$id = $wpdb->get_var( $wpdb->prepare( "SELECT blog_id FROM $wpdb->blogs WHERE domain = %s and path = %s /* get_blog_id_from_url */", $domain, $path ) );
-
+	#$id = $wpdb->get_var( $wpdb->prepare( "SELECT blog_id FROM $wpdb->blogs WHERE domain = %s and path = %s /* get_blog_id_from_url */", $domain, $path ) );
+	if ($path == "/blog/"){
+		$id = 1;
+	}else{
+		$id = $wpmdb->businesses->findOne(array("domains" => explode('/', $path)[2]), array('intId'))["intId"];
+	}
 	if ( ! $id ) {
 		wp_cache_set( md5( $domain . $path ), -1, 'blog-id-cache' );
 		return 0;
