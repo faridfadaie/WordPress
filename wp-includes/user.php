@@ -1238,7 +1238,7 @@ function get_blogs_of_user( $user_id, $all = false ) {
                                 'domain'      => 'www.doxi.io',
                                 'path'        => $tmp,
                                 'site_id'     => 1,
-                                'siteurl'     => "http://www.doxi.io/blog"
+                                'siteurl'     => "http://www.doxi.io/blog/".$blog["domains"][0]
 			);
 		}
 	}
