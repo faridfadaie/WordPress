@@ -291,6 +291,7 @@ function wp_get_network( $network ) {
  */
 function get_site_by_path( $domain, $path, $segments = null ) {
 	global $wpdb;
+	global $wpmdb;
 
 	$path_segments = array_filter( explode( '/', trim( $path, '/' ) ) );
 
@@ -364,7 +365,7 @@ function get_site_by_path( $domain, $path, $segments = null ) {
 	if ( count( $paths ) > 1 ) {
 		$search_paths = "'" . implode( "', '", $wpdb->_escape( $paths ) ) . "'";
 	}
-
+	/**
 	if ( count( $domains ) > 1 && count( $paths ) > 1 ) {
 		$site = $wpdb->get_row( "SELECT * FROM $wpdb->blogs WHERE domain IN ($search_domains) AND path IN ($search_paths) ORDER BY CHAR_LENGTH(domain) DESC, CHAR_LENGTH(path) DESC LIMIT 1" );
 	} elseif ( count( $domains ) > 1 ) {
@@ -378,7 +379,25 @@ function get_site_by_path( $domain, $path, $segments = null ) {
 	} else {
 		$site = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->blogs WHERE domain = %s AND path = %s", $domains[0], $paths[0] ) );
 	}
-
+	**/
+	if ($path == "/blog/"){
+		$site = new stdClass;
+                $site->blog_id = 1;
+                $site->site_id = 1;
+                $site->domain = "www.doxi.io";
+                $site->path = $path;
+                $site->public = 1;
+        }       
+        else{
+                $blog  = $wpmdb->businesses->findOne(array("domains" => explode('/', $path)[2]), array('intId',"domains"));
+        	$tmp = "/blog/".$blog["domains"][0]."/";
+		$site = new stdClass;
+                $site->blog_id = $blog["intId"];
+                $site->site_id = 1;
+                $site->domain = "www.doxi.io";
+                $site->path = $tmp;
+                $site->public = 1;
+	}
 	if ( $site ) {
 		// @todo get_blog_details()
 		return $site;
