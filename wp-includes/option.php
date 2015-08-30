@@ -52,6 +52,7 @@ function get_option( $option, $default = false ) {
 		return false;
 
 	if ( ! defined( 'WP_INSTALLING' ) ) {
+		
 		// prevent non-existent options from triggering multiple queries
 		$notoptions = wp_cache_get( 'notoptions', 'options' );
 		if ( isset( $notoptions[ $option ] ) ) {
@@ -67,7 +68,18 @@ function get_option( $option, $default = false ) {
 			 */
 			return apply_filters( 'default_option_' . $option, $default );
 		}
-
+		if (explode("wp",explode("_options",$wpdb->options)[0])[1] == "")
+			$blog_id = 1;
+		else
+			$blog_id = (int) explode("_",explode("wp",explode("_options",$wpdb->options)[0])[1])[1];
+		if (in_array($option, array("siteurl","home","blogname"))){
+			$detail = get_blog_details($blog_id);
+			if ($option == "home"){
+				$value = $detail->siteurl;
+			}else{
+				$value = $detail->$option;
+			}
+		}else{
 		$alloptions = wp_load_alloptions();
 
 		if ( isset( $alloptions[$option] ) ) {
@@ -76,6 +88,7 @@ function get_option( $option, $default = false ) {
 			$value = wp_cache_get( $option, 'options' );
 
 			if ( false === $value ) {
+				
 				$row = $wpdb->get_row( $wpdb->prepare( "SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1", $option ) );
 
 				// Has to be get_row instead of get_var because of funkiness with 0, false, null values
@@ -93,7 +106,7 @@ function get_option( $option, $default = false ) {
 					return apply_filters( 'default_option_' . $option, $default );
 				}
 			}
-		}
+		}}
 	} else {
 		$suppress = $wpdb->suppress_errors();
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1", $option ) );
