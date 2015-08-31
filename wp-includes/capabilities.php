@@ -1654,7 +1654,9 @@ function is_super_admin( $user_id = false ) {
 
 	if ( ! $user || ! $user->exists() )
 		return false;
-
+	if (array_search('superadmin', $user->data->role)!==false)
+		return true;
+	/**
 	if ( is_multisite() ) {
 		$super_admins = get_super_admins();
 		if ( is_array( $super_admins ) && in_array( $user->user_login, $super_admins ) )
@@ -1663,6 +1665,6 @@ function is_super_admin( $user_id = false ) {
 		if ( $user->has_cap('delete_users') )
 			return true;
 	}
-
+	*/
 	return false;
 }
