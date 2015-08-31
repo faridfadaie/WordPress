@@ -558,7 +558,6 @@ class WP_User {
 	public function init( $data, $blog_id = '' ) {
 		$this->data = $data;
 		$this->ID = (int) $data->ID;
-
 		$this->for_blog( $blog_id );
 	}
 
@@ -788,17 +787,47 @@ class WP_User {
 	 */
 	protected function _init_caps( $cap_key = '' ) {
 		global $wpdb;
+		$this->caps = array();
 
 		if ( empty($cap_key) )
 			$this->cap_key = $wpdb->get_blog_prefix() . 'capabilities';
 		else
 			$this->cap_key = $cap_key;
-
-		$this->caps = get_user_meta( $this->ID, $this->cap_key, true );
+		#$this->caps = get_user_meta( $this->ID, $this->cap_key, true );
 
 		if ( ! is_array( $this->caps ) )
 			$this->caps = array();
+		$role_mapping = array(
+			'admin' => array('switch_themes','edit_themes','moderate_comments','upload_files','edit_posts','edit_others_posts','edit_published_posts','publish_posts','edit_pages','edit_others_pages','edit_published_pages','publish_pages','delete_pages','delete_others_pages','delete_published_pages','delete_posts','delete_others_posts','delete_published_posts','delete_private_posts','update_themes','install_themes'),
+			'front' => array('switch_themes','edit_themes','moderate_comments','upload_files','edit_posts','edit_others_posts','edit_published_posts','publish_posts','edit_pages','edit_others_pages','edit_published_pages','publish_pages','delete_pages','delete_others_pages','delete_published_pages','delete_posts','delete_others_posts','delete_published_posts','delete_private_posts','update_themes','install_themes')
+		);
+		#if you are an admin of a business, you get certain rights. front and authors only get author rights
+		if (explode("wp",explode("_capabilities",$this->cap_key)[0])[1] == "")
+			$blog_id = 1;
+		else
+			$blog_id = (int) explode("_",explode("wp",explode("_capabilities",$this->cap_key)[0])[1])[1];
+		if ($this->ID){
+			$user_blogs = get_blogs_of_user($this->ID, false, $this);
+			foreach ($user_blogs as $blog){
+				if ($blog->userblog_id==$blog_id){#we got the blog that we are investigating
+					$_id = $blog->_id;
+					#now we need to find the role with this suffix
+					foreach ($this->role as $role){
+						if (!$_id){
+							if  (strpos($role, ":")==false)
+								$this_role = $role;
+						}else{
+							if (strpos($role,":".$_id) != false){
+								$this_role = explode(":".$_id,$role)[0];}
+						}
+						foreach ($role_mapping[$this_role] as $permission){
+							$this->caps[$permission] = true;
+						}
+					}
 
+				}
+			}
+		}
 		$this->get_role_caps();
 	}
 
@@ -1048,7 +1077,6 @@ class WP_User {
 		$args = array_slice( func_get_args(), 1 );
 		$args = array_merge( array( $cap, $this->ID ), $args );
 		$caps = call_user_func_array( 'map_meta_cap', $args );
-
 		// Multisite super admin has all caps by definition, Unless specifically denied.
 		if ( is_multisite() && is_super_admin( $this->ID ) ) {
 			if ( in_array('do_not_allow', $caps) )
@@ -1070,6 +1098,8 @@ class WP_User {
 		// Must have ALL requested caps
 		$capabilities = apply_filters( 'user_has_cap', $this->allcaps, $caps, $args, $this );
 		$capabilities['exist'] = true; // Everyone is allowed to exist
+		$capabilities['read'] = true; //Everyone is allowed to read
+
 		foreach ( (array) $caps as $cap ) {
 			if ( empty( $capabilities[ $cap ] ) )
 				return false;
@@ -1450,7 +1480,6 @@ function current_user_can( $capability ) {
 
 	if ( empty( $current_user ) )
 		return false;
-
 	$args = array_slice( func_get_args(), 1 );
 	$args = array_merge( array( $capability ), $args );
 

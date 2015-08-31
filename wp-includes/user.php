@@ -1169,7 +1169,7 @@ function get_users( $args = array() ) {
  * @return array A list of the user's blogs. An empty array if the user doesn't exist
  *               or belongs to no blogs.
  */
-function get_blogs_of_user( $user_id, $all = false ) {
+function get_blogs_of_user( $user_id, $all = false, $duser = false ) {
 	global $wpdb;
 	global $wpmdb;
 
@@ -1218,9 +1218,11 @@ function get_blogs_of_user( $user_id, $all = false ) {
 		}
 		unset( $keys[ $wpdb->base_prefix . 'capabilities' ] );
 	}
-**/	
-	foreach (get_user_by( 'id', $user_id )->data->role as $role){
-		if ($role == "admin"){#this is an admin of the whole site
+**/
+	if (!$duser)
+		$duser = get_user_by( 'id', $user_id );
+	foreach ($duser->data->role as $role){
+		if ($role == "admin"){#this is an admin of the main site
 			$blogs[1] = (object) array(
 				'userblog_id' => 1,
 				'blogname'    => "Doxi blog",
@@ -1238,6 +1240,7 @@ function get_blogs_of_user( $user_id, $all = false ) {
                                 'domain'      => 'www.doxi.io',
                                 'path'        => $tmp,
                                 'site_id'     => 1,
+				'_id'         => $blog["_id"]->{'$id'},
                                 'siteurl'     => "http://www.doxi.io/blog/".$blog["domains"][0]
 			);
 		}
