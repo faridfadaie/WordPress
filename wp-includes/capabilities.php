@@ -798,6 +798,7 @@ class WP_User {
 		if ( ! is_array( $this->caps ) )
 			$this->caps = array();
 		$role_mapping = array(
+			'superadmin' => array(),
 			'admin' => array('switch_themes','edit_themes','moderate_comments','upload_files','edit_posts','edit_others_posts','edit_published_posts','publish_posts','edit_pages','edit_others_pages','edit_published_pages','publish_pages','delete_pages','delete_others_pages','delete_published_pages','delete_posts','delete_others_posts','delete_published_posts','delete_private_posts','update_themes','install_themes'),
 			'front' => array('switch_themes','edit_themes','moderate_comments','upload_files','edit_posts','edit_others_posts','edit_published_posts','publish_posts','edit_pages','edit_others_pages','edit_published_pages','publish_pages','delete_pages','delete_others_pages','delete_published_pages','delete_posts','delete_others_posts','delete_published_posts','delete_private_posts','update_themes','install_themes')
 		);
@@ -820,9 +821,10 @@ class WP_User {
 							if (strpos($role,":".$_id) != false){
 								$this_role = explode(":".$_id,$role)[0];}
 						}
-						foreach ($role_mapping[$this_role] as $permission){
-							$this->caps[$permission] = true;
-						}
+						if ($this_role)
+							foreach ($role_mapping[$this_role] as $permission){
+								$this->caps[$permission] = true;
+							}
 					}
 
 				}
