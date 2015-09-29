@@ -628,7 +628,7 @@ class WP_User {
 		$user->user_pass = $user_from_mongo["password"];
 		$user->user_email = $user_from_mongo["email"];
 		$user->display_name = $user_from_mongo["profile"]["name"];
-		$user->user_nicename = $user_from_mongo["profile"]["name"];
+		$user->user_nicename = $user_from_mongo["_id"]->{'$id'};
 		$user->_id = $user_from_mongo["_id"]->{'$id'};
 		$user->role = $user_from_mongo["role"];
 
