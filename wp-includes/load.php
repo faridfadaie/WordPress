@@ -349,7 +349,7 @@ function require_wp_db() {
 		return;
 	$m = new MongoClient(MDB_HOST);
         $url = parse_url(MDB_HOST);
-        $db_name = preg_replace('/\/(.*)/', '$1', $url['path']);
+	$db_name = preg_replace('/\//', '', $url['path']);
         $wpmdb = $m->selectDB($db_name);
 	$wpdb = new wpdb( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
 }
