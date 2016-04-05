@@ -31,8 +31,8 @@ if(function_exists('override_add_doxi_analytics')) {
       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
       })(window,document,"script","//www.google-analytics.com/analytics.js","ga");
 
-      ga("create", "UA-66473329-1", "auto", {'allowLinker' : true});
-      if (document.location.host=="www.soothing.dental"){ga('require', 'linker');ga('linker:autoLink', ['soothing.doxi.io'], true, true);};
+      ga("create", "UA-66473329-1", "auto", {"allowLinker" : true});
+      if (document.location.host=="www.soothing.dental"){ga("require", "linker");ga("linker:autoLink", ["soothing.doxi.io"], true, true);};
       ga("send", {
         "hitType": "pageview",
         "page" : window.location.pathname + window.location.search,
