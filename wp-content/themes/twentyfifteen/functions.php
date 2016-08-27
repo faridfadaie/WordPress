@@ -120,6 +120,10 @@ function twentyfifteen_setup() {
 }
 endif; // twentyfifteen_setup
 add_action( 'after_setup_theme', 'twentyfifteen_setup' );
+add_action('wp_head', 'facebook_instant_articles');
+function facebook_instant_articles() {
+   echo '<meta property="fb:pages" content="101750861909" />' . "\n";
+}
 
 /**
  * Register widget area.
