@@ -1078,7 +1078,7 @@ class PageFrog_Admin {
 					$pagefrog_path = plugin_dir_path( $plugin );
 				}
 			}
-			$file = $pagefrog_path . 'admin/partials/pagefrog-amp-template-single.php';
+			$file = $pagefrog_path . '/admin/partials/pagefrog-amp-template-single.php';
 		} else if ( 'meta-author' === $type ) {
 			$plugins = wp_get_active_and_valid_plugins();
 			$pagefrog_path = dirname( plugin_dir_path( __FILE__ ) );
