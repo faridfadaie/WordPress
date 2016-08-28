@@ -82,7 +82,7 @@ class WPSEO_JSON_LD {
 		$this->data = array(
 			'@context' => 'http://schema.org',
 			'@type'    => 'WebSite',
-			'url'      => $this->get_home_url(),
+			'url'      => 'http://www.soothing.dental/blog/',
 			'name'     => $this->get_website_name(),
 		);
 
@@ -230,7 +230,7 @@ class WPSEO_JSON_LD {
 
 			$this->data['potentialAction'] = array(
 				'@type'       => 'SearchAction',
-				'target'      => $search_url,
+				'target'      => 'http://www.soothing.dental/blog/?s={search_term_string}',
 				'query-input' => 'required name=search_term_string',
 			);
 		}
