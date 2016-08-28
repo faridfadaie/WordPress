@@ -148,7 +148,7 @@ class AMP_Post_Template {
 		if ( $site_icon_url ) {
 			$metadata['publisher']['logo'] = array(
 				'@type' => 'ImageObject',
-				'url' => $site_icon_url,
+				'url' => str_replace('www.doxi.io/blog/soothing','www.soothing.dental/blog',$site_icon_url),
 				'height' => self::SITE_ICON_SIZE,
 				'width' => self::SITE_ICON_SIZE,
 			);
@@ -227,7 +227,7 @@ class AMP_Post_Template {
 		if ( is_array( $post_image_src ) ) {
 			$post_image_meta = array(
 				'@type' => 'ImageObject',
-				'url' => $post_image_src[0],
+				'url' => str_replace('www.doxi.io/blog/soothing','www.soothing.dental/blog',$post_image_src[0]),
 				'width' => $post_image_src[1],
 				'height' => $post_image_src[2],
 			);
