@@ -153,7 +153,7 @@ class WPSEO_JSON_LD {
 		$this->data = array(
 			'@context' => 'http://schema.org',
 			'@type'    => '',
-			'url'      => WPSEO_Frontend::get_instance()->canonical( false, true ),
+			'url'      => 'http://www.soothing.dental/blog/',
 			'sameAs'   => $this->profiles,
 		);
 	}
