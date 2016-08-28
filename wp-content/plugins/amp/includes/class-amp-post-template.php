@@ -130,7 +130,7 @@ class AMP_Post_Template {
 		$metadata = array(
 			'@context' => 'http://schema.org',
 			'@type' => 'BlogPosting',
-			'mainEntityOfPage' => $this->get( 'canonical_url' ),
+			'mainEntityOfPage' => str_replace('www.doxi.io/blog/soothing','www.soothing.dental/blog',$this->get( 'canonical_url' )),
 			'publisher' => array(
 				'@type' => 'Organization',
 				'name' => $this->get( 'blog_name' ),
